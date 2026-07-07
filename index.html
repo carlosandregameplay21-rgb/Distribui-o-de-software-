@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusEngine — Performance que Transforma Resultados</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #050505; color: #e5e5e5; overflow-x: hidden; }
+
+        /* Animação de entrada */
+        @keyframes slideInUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 0.08; transform: scale(1); }
+            50% { opacity: 0.14; transform: scale(1.08); }
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.03; }
+            50% { opacity: 0.06; }
+        }
+
+        .animate-in { animation: slideInUp 0.6s ease-out forwards; opacity: 0; }
+        .delay-1 { animation-delay: 0.15s; }
+        .delay-2 { animation-delay: 0.3s; }
+        .delay-3 { animation-delay: 0.45s; }
+        .delay-4 { animation-delay: 0.6s; }
+        .delay-5 { animation-delay: 0.75s; }
+        .delay-6 { animation-delay: 0.9s; }
+
+        /* Grid de fundo */
+        .bg-grid {
+            background-image: linear-gradient(to right, #80808005 1px, transparent 1px), linear-gradient(to bottom, #80808005 1px, transparent 1px);
+            background-size: 24px 24px;
+            animation: gridPulse 6s ease-in-out infinite;
+        }
+
+        /* Glow orbs */
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            mix-blend-mode: screen;
+            animation: pulse-slow 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        /* Botão primário com shimmer */
+        .btn-primary {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(to right, #047857, #059669);
+            box-shadow: 0 0 30px rgba(4,120,87,0.4);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 0 50px rgba(4,120,87,0.6);
+            transform: translateY(-1px);
+        }
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%);
+            animation: shimmer 3s infinite linear;
+        }
+
+        /* Botão secundário */
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.2);
+            box-shadow: 0 0 15px rgba(255,255,255,0.1);
+            transform: translateY(-1px);
+        }
+
+        /* Cards de feature */
+        .feature-card {
+            background: rgba(23,23,23,0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 24px;
+            padding: 40px 32px;
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(16,185,129,0.3), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .feature-card:hover {
+            background: rgba(23,23,23,0.7);
+            border-color: rgba(16,185,129,0.15);
+            box-shadow: 0 0 60px rgba(16,185,129,0.06);
+            transform: translateY(-4px);
+        }
+        .feature-card:hover::before { opacity: 1; }
+
+        /* Ícone container */
+        .icon-box {
+            width: 56px; height: 56px;
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(16,185,129,0.08);
+            border: 1px solid rgba(16,185,129,0.15);
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover .icon-box {
+            background: rgba(16,185,129,0.15);
+            box-shadow: 0 0 20px rgba(16,185,129,0.2);
+        }
+
+        /* Stat card */
+        .stat-card {
+            text-align: center;
+            padding: 32px 24px;
+            border-radius: 24px;
+            background: rgba(23,23,23,0.3);
+            border: 1px solid rgba(255,255,255,0.04);
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            border-color: rgba(16,185,129,0.1);
+            background: rgba(23,23,23,0.5);
+        }
+
+        /* Step card */
+        .step-card {
+            position: relative;
+            padding: 32px;
+            border-radius: 24px;
+            background: rgba(23,23,23,0.3);
+            border: 1px solid rgba(255,255,255,0.04);
+            transition: all 0.3s ease;
+        }
+        .step-card:hover {
+            border-color: rgba(255,255,255,0.1);
+            background: rgba(23,23,23,0.5);
+        }
+        .step-number {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #047857, #059669);
+            font-weight: 700;
+            font-size: 18px;
+            color: white;
+            box-shadow: 0 0 30px rgba(4,120,87,0.3);
+        }
+
+        /* Testimonial */
+        .testimonial-card {
+            background: rgba(23,23,23,0.4);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 24px;
+            padding: 36px;
+            transition: all 0.3s ease;
+        }
+        .testimonial-card:hover {
+            border-color: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Navbar */
+        .nav-glass {
+            background: rgba(5,5,5,0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Seção de FAQ */
+        .faq-item {
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: rgba(23,23,23,0.3);
+        }
+        .faq-item.active {
+            border-color: rgba(16,185,129,0.15);
+            background: rgba(23,23,23,0.5);
+        }
+        .faq-header {
+            padding: 24px 28px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        .faq-header:hover { background: rgba(255,255,255,0.02); }
+        .faq-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), padding 0.3s ease;
+            padding: 0 28px;
+        }
+        .faq-item.active .faq-content {
+            max-height: 300px;
+            padding: 0 28px 24px 28px;
+        }
+        .faq-chevron { transition: transform 0.3s ease; }
+        .faq-item.active .faq-chevron { transform: rotate(180deg); }
+
+        /* Código visual */
+        .code-block {
+            background: #0A0A0A;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 24px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            color: #a3a3a3;
+            overflow-x: auto;
+        }
+        .code-keyword { color: #10b981; }
+        .code-type { color: #60a5fa; }
+        .code-string { color: #fbbf24; }
+        .code-comment { color: #525252; }
+        .code-func { color: #c084fc; }
+
+        /* Mascara de gradiente no final das seções */
+        .fade-bottom {
+            position: relative;
+        }
+        .fade-bottom::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 120px;
+            background: linear-gradient(to top, #050505, transparent);
+            pointer-events: none;
+        }
+
+        /* Toast de notificação */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: rgba(23,23,23,0.95);
+            border: 1px solid rgba(16,185,129,0.3);
+            border-radius: 16px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            transform: translateY(120%);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 0 40px rgba(16,185,129,0.1);
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Scrollbar customizada */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #262626; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #404040; }
+
+        /* Mobile menu */
+        .mobile-menu {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(5,5,5,0.97);
+            backdrop-filter: blur(20px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .mobile-menu.open { transform: translateX(0); }
+        .mobile-menu a {
+            font-size: 24px;
+            font-weight: 500;
+            color: #a3a3a3;
+            transition: color 0.2s ease;
+        }
+        .mobile-menu a:hover { color: #e5e5e5; }
+
+        /* Badge animado */
+        .badge-glow {
+            animation: float 5s ease-in-out infinite;
+        }
+
+        /* Seção visível na scroll */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.4,0,0.2,1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-grid">
+
+    <!-- ========== GLOW ORBS ========== -->
+    <div class="glow-orb" style="width:800px;height:800px;background:#10b981;opacity:0.06;top:-300px;right:-300px;"></div>
+    <div class="glow-orb" style="width:600px;height:600px;background:#047857;opacity:0.05;bottom:20%;left:-200px;animation-delay:2s;"></div>
+    <div class="glow-orb" style="width:500px;height:500px;background:#059669;opacity:0.04;top:60%;right:-150px;animation-delay:4s;"></div>
+
+    <!-- ========== NAVBAR ========== -->
+    <nav class="nav-glass fixed top-0 left-0 right-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#047857] to-[#059669] flex items-center justify-center shadow-[0_0_20px_rgba(4,120,87,0.4)] group-hover:shadow-[0_0_30px_rgba(4,120,87,0.6)] transition-shadow">
+                    <i data-lucide="zap" class="w-5 h-5 text-white"></i>
+                </div>
+                <span class="text-lg font-semibold text-white tracking-tight">NexusEngine</span>
+            </a>
+
+            <!-- Desktop Links -->
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#features" class="text-sm text-neutral-400 hover:text-white transition-colors">Recursos</a>
+                <a href="#performance" class="text-sm text-neutral-400 hover:text-white transition-colors">Performance</a>
+                <a href="#how-it-works" class="text-sm text-neutral-400 hover:text-white transition-colors">Como Funciona</a>
+                <a href="#faq" class="text-sm text-neutral-400 hover:text-white transition-colors">FAQ</a>
+            </div>
+
+            <!-- CTA + Mobile Toggle -->
+            <div class="flex items-center gap-4">
+                <a href="#download" class="hidden sm:inline-flex btn-primary text-white text-sm font-medium px-6 py-2.5 rounded-full items-center gap-2">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    Baixar Agora
+                </a>
+                <button id="menuToggle" class="md:hidden w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors">
+                    <i data-lucide="menu" class="w-5 h-5 text-neutral-400"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== MOBILE MENU ========== -->
+    <div id="mobileMenu" class="mobile-menu">
+        <button id="menuClose" class="absolute top-6 right-6 w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors">
+            <i data-lucide="x" class="w-5 h-5 text-neutral-400"></i>
+        </button>
+        <a href="#features" class="mobile-link">Recursos</a>
+        <a href="#performance" class="mobile-link">Performance</a>
+        <a href="#how-it-works" class="mobile-link">Como Funciona</a>
+        <a href="#faq" class="mobile-link">FAQ</a>
+        <a href="#download" class="btn-primary text-white font-medium px-8 py-3 rounded-full mt-4 mobile-link">Baixar Agora</a>
+    </div>
+
+    <!-- ========== HERO SECTION ========== -->
+    <section class="relative pt-32 pb-24 md:pt-40 md:pb-32 px-6">
+        <div class="max-w-5xl mx-auto text-center">
+            <!-- Badge -->
+            <div class="animate-in inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/[0.03] mb-8 badge-glow">
+                <span class="w-2 h-2 rounded-full bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span>
+                <span class="text-xs font-medium text-neutral-400 uppercase tracking-widest">Desenvolvido em C++ Nativo</span>
+            </div>
+
+            <!-- Título Principal -->
+            <h1 class="animate-in delay-1 text-4xl md:text-6xl lg:text-7xl font-semibold leading-[1.1] tracking-tight text-white mb-6">
+                Automatize sua rotina com
+                <span class="relative inline-block">
+                    <span class="bg-gradient-to-r from-[#10b981] to-[#047857] bg-clip-text text-transparent">NexusEngine</span>
+                    <svg class="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 300 8" fill="none">
+                        <path d="M1 5.5C60 2 120 1 150 3C180 5 240 6 299 2.5" stroke="#10b981" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+                    </svg>
+                </span>
+            </h1>
+
+            <!-- Subtítulo -->
+            <p class="animate-in delay-2 text-lg md:text-xl text-neutral-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                Eficiência máxima e controle total. Esqueça processos manuais demorados e garanta a <span class="text-neutral-200 font-medium">precisão</span> que o seu projeto exige.
+            </p>
+
+            <!-- CTAs -->
+            <div class="animate-in delay-3 flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+                <a href="#download" class="btn-primary text-white text-lg font-medium px-10 py-4 rounded-full inline-flex items-center gap-3">
+                    <i data-lucide="download" class="w-5 h-5"></i>
+                    BAIXAR O NEXUSENGINE
+                </a>
+                <a href="#features" class="btn-secondary text-neutral-300 text-sm font-medium px-8 py-4 rounded-full inline-flex items-center gap-2">
+                    <i data-lucide="play-circle" class="w-4 h-4"></i>
+                    Ver Recursos
+                </a>
+            </div>
+
+            <!-- Code Preview -->
+            <div class="animate-in delay-4 max-w-2xl mx-auto">
+                <div class="code-block text-left">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="w-3 h-3 rounded-full bg-red-500/60"></span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500/60"></span>
+                        <span class="w-3 h-3 rounded-full bg-green-500/60"></span>
+                        <span class="ml-4 text-xs text-neutral-600">nexus_engine.cpp</span>
+                    </div>
+                    <span class="code-comment">// Inicialize em 3 linhas</span><br>
+                    <span class="code-keyword">#include</span> <span class="code-string">&lt;nexus/engine.h&gt;</span><br><br>
+                    <span class="code-type">NexusEngine</span> <span class="code-func">engine</span>(<span class="code-string">"config.json"</span>);<br>
+                    engine.<span class="code-func">run</span>(); <span class="code-comment">// Pronto. 💚</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== STATS BAR ========== -->
+    <section class="relative py-16 px-6 border-y border-white/[0.04]">
+        <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="stat-card reveal">
+                <div class="text-3xl md:text-4xl font-bold text-white mb-1" data-count="10">10x</div>
+                <div class="text-sm text-neutral-500">Mais Rápido</div>
+            </div>
+            <div class="stat-card reveal" style="transition-delay:0.1s">
+                <div class="text-3xl md:text-4xl font-bold text-white mb-1">99.9%</div>
+                <div class="text-sm text-neutral-500">Uptime</div>
+            </div>
+            <div class="stat-card reveal" style="transition-delay:0.2s">
+                <div class="text-3xl md:text-4xl font-bold text-white mb-1">&lt;2ms</div>
+                <div class="text-sm text-neutral-500">Latência</div>
+            </div>
+            <div class="stat-card reveal" style="transition-delay:0.3s">
+                <div class="text-3xl md:text-4xl font-bold text-white mb-1">0</div>
+                <div class="text-sm text-neutral-500">Dependências</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FEATURES SECTION ========== -->
+    <section id="features" class="relative py-24 md:py-32 px-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-16 reveal">
+                <span class="text-xs font-semibold text-[#10b981] uppercase tracking-[0.2em] mb-4 block">Recursos</span>
+                <h2 class="text-3xl md:text-5xl font-semibold tracking-tight text-white mb-5">
+                    Tudo que você precisa,<br>
+                    <span class="font-['Playfair_Display'] italic text-neutral-400">nada que você não precisa</span>
+                </h2>
+                <p class="text-neutral-500 text-lg max-w-xl mx-auto">
+                    Cada funcio
