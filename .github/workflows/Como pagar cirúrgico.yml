@@ -1,51 +1,65 @@
-name: 🎯 Extração Cirúrgica Automática (.h)
+name: 🎯 Arrastão Cirúrgico de Headers (.h)
 
 on:
   workflow_dispatch:
     inputs:
-      link_raw:
-        description: 'Cole aqui o link direto (raw) do arquivo .h'
+      repositorio:
+        description: 'Cole o link do repositório alvo (ex: https://github.com/libsdl-org/SDL)'
         required: true
         default: ''
 
 jobs:
-  cirurgia-header:
+  arrastao-headers:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: "🎯 Executando Manobra Cirúrgica do .h"
+      - name: "🚀 Executando Arrastão Massivo e Limpeza Cirúrgica"
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
 
-          LINK_ALVO="${{ github.event.inputs.link_raw }}"
+          REPO_ALVO="${{ github.event.inputs.repositorio }}"
           PASTA_ALVO=".h"
+          TEMP_CLONE="temp_repo_clone"
 
-          # Extrai automaticamente o nome original do arquivo do final do link (ex: SDL_video.h)
-          NOME_DESTINACAO=$(basename "$LINK_ALVO")
-
-          echo "=== 🎯 INICIANDO BUSCA CIRÚRGICA AUTOMÁTICA ==="
-          echo "[*] Alvo inserido: $LINK_ALVO"
-          echo "[*] Nome original detectado: $NOME_DESTINACAO"
-          echo "[*] Criando ou acessando a pasta de repositórios: $PASTA_ALVO"
+          echo "=== 🎯 INICIANDO ARRASTÃO MASSIVO DE REPOSITÓRIO ==="
+          echo "[*] Repositório alvo: $REPO_ALVO"
           mkdir -p "$PASTA_ALVO"
+          rm -rf "$TEMP_CLONE"
 
-          echo "[*] Puxando o arquivo alvo de forma cirúrgica..."
-          wget -q "$LINK_ALVO" -O "$PASTA_ALVO/$NOME_DESTINACAO"
+          echo "[*] Clonando repositório de forma relâmpago (--depth 1)..."
+          git clone --depth 1 "$REPO_ALVO" "$TEMP_CLONE" --quiet
 
-          echo "[+] Sucesso! Arquivo salvo em: $PASTA_ALVO/$NOME_DESTINACAO"
+          echo "[*] Vasculhando e extraindo todos os headers (.h, .hpp, .hh, .hxx, .h++)..."
+          find "$TEMP_CLONE" -type f \( -name "*.h" -o -name "*.hpp" -o -name "*.hh" -o -name "*.hxx" -o -name "*.h++" \) | while read -r arquivo; do
+              basename_arq=$(basename "$arquivo")
+              cp "$arquivo" "$PASTA_ALVO/$basename_arq"
+          done
+
+          echo "[*] Executando limpeza cirúrgica de subpastas nos includes..."
+          for h_file in "$PASTA_ALVO"/*; do
+              if [ -f "$h_file" ]; then
+                  # Converte qualquer #include <pasta/arquivo.h> para #include "arquivo.h"
+                  sed -i 's/#include <[^<>]*\/\([^<>]*\)>/#include "\1"/g' "$h_file" || true
+              fi
+          done
+
+          echo "[*] Limpando vestígios temporários..."
+          rm -rf "$TEMP_CLONE"
+
+          echo "[+] Sucesso! Cofre atualizado com todos os headers planos."
           ls -la "$PASTA_ALVO"
 
-      - name: "📦 Sincronizar Header no Repositório"
+      - name: "📦 Sincronizar Cofre no Repositório"
         run: |
           git config --global user.name "Carlos Bot"
           git config --global user.email "carlos@bot.local"
           git add .h/
           if ! git diff-index --quiet HEAD --; then
-            git commit -m "🎯 [CIRURGIA .H] Header extraído automaticamente e versionado [skip ci]"
+            git commit -m "🚀 [ARRASTÃO .H] Ingestão massiva do repositório ${{ github.event.inputs.repositorio }} [skip ci]"
             git push
           fi
           
