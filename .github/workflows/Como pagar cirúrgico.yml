@@ -1,0 +1,51 @@
+name: 🎯 Extração Cirúrgica de Header Qt (.h)
+
+on:
+  workflow_dispatch:
+    inputs:
+      link_raw:
+        description: 'Cole aqui o link direto (raw) do arquivo .h'
+        required: true
+        default: ''
+      nome_arquivo:
+        description: 'Nome do arquivo para salvar (ex: qwidget.h)'
+        required: true
+        default: 'qwidget.h'
+
+jobs:
+  cirurgia-header:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "🎯 Executando Manobra Cirúrgica do .h"
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          LINK_ALVO="${{ github.event.inputs.link_raw }}"
+          NOME_DESTINACAO="${{ github.event.inputs.nome_arquivo }}"
+          PASTA_ALVO=".h"
+
+          echo "=== 🎯 INICIANDO BUSCA CIRÚRGICA DO HEADER ==="
+          echo "[*] Alvo inserido via input: $LINK_ALVO"
+          echo "[*] Criando ou acessando a pasta de repositórios: $PASTA_ALVO"
+          mkdir -p "$PASTA_ALVO"
+
+          echo "[*] Puxando o arquivo alvo de forma cirúrgica..."
+          wget -q "$LINK_ALVO" -O "$PASTA_ALVO/$NOME_DESTINACAO"
+
+          echo "[+] Sucesso! Arquivo salvo em: $PASTA_ALVO/$NOME_DESTINACAO"
+          ls -la "$PASTA_ALVO"
+
+      - name: "📦 Sincronizar Header no Repositório"
+        run: |
+          git config --global user.name "Carlos Bot"
+          git config --global user.email "carlos@bot.local"
+          git add .h/
+          if ! git diff-index --quiet HEAD --; then
+            git commit -m "🎯 [CIRURGIA .H] Header ${{ github.event.inputs.nome_arquivo }} extraído e versionado [skip ci]"
+            git push
+          fi
