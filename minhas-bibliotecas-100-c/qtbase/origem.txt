@@ -1,2 +1,0 @@
-Origem da Forja C: https://github.com/qt/qtbase.git
-Data da Operação: Mon Sep 21 13:56:43 UTC 2026
