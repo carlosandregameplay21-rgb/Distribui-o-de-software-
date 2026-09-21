@@ -1,5 +1,4 @@
-name: 👾música no fantástico
-
+name: 👾vamos lá mano vamos conseguir fazer isso
 on:
   workflow_dispatch:
     inputs:
@@ -28,7 +27,16 @@ jobs:
           REPO_ALVO="${{ github.event.inputs.repositorio }}"
           TEMP_CLONE="temp_repo_clone"
           
+          # Limpa espaços extras ou quebras indesejadas na URL
+          REPO_ALVO=$(echo "$REPO_ALVO" | xargs)
           NOME_REPO=$(basename "$REPO_ALVO" .git)
+          
+          # Trava de segurança contra arquivos fantasmas ou nomes inválidos
+          if [ -z "$NOME_REPO" ] || [ "$NOME_REPO" = "para" ]; then
+              echo "[!] Erro crítico: Nome de repositório inválido detectado!"
+              exit 1
+          fi
+          
           PASTA_DESTINO="minhas-bibliotecas-100-c/$NOME_REPO"
           
           echo "=== 🧪 INICIANDO PURIFICAÇÃO DE CLÃS C ==="
@@ -84,3 +92,4 @@ jobs:
             git commit -m "🧪 [CLÃ-C] Objetos .o e Biblioteca Estática lib${{ github.event.inputs.repositorio }}.a forjados [skip ci]"
             git push
           fi
+          
