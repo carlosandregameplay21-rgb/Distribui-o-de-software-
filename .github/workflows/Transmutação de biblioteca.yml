@@ -1,4 +1,5 @@
-name: 👾transmutação suprema 
+name: 👾música no fantástico
+
 on:
   workflow_dispatch:
     inputs:
@@ -19,7 +20,7 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y build-essential binutils
 
-      - name: "🚀 Caçando e Transmutando arquivos .c em Objetos (.o) puros"
+      - name: "🚀 Caçando, Transmutando e Organizando a Tribo Binária"
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
@@ -30,40 +31,48 @@ jobs:
           NOME_REPO=$(basename "$REPO_ALVO" .git)
           PASTA_DESTINO="minhas-bibliotecas-100-c/$NOME_REPO"
           
-          echo "=== 🧪 INICIANDO PURIFICAÇÃO DE BIBLIOTECAS C ==="
+          echo "=== 🧪 INICIANDO PURIFICAÇÃO DE CLÃS C ==="
           echo "[*] Repositório alvo: $REPO_ALVO"
           
           mkdir -p "$PASTA_DESTINO"
           rm -rf "$TEMP_CLONE"
           
-          # 📜 Registro de origem
+          # 📜 Registro de origem da tribo
           echo "Origem da Forja C: $REPO_ALVO" > "$PASTA_DESTINO/origem.txt"
           echo "Data da Operação: $(date -u)" >> "$PASTA_DESTINO/origem.txt"
           
           echo "[*] Clonando repositório..."
           git clone --depth 1 "$REPO_ALVO" "$TEMP_CLONE" --quiet
           
-          echo "[*] Vasculando e compilar arquivos .c puros..."
-          # Caça todos os arquivos .c, ignorando pastas de testes ou exemplos se necessário, e compila via gcc -c
+          echo "[*] Compilando arquivos C puros..."
           find "$TEMP_CLONE" -type f -name "*.c" | while read -r source_file; do
               nome_arquivo=$(basename "$source_file")
               name=$(echo "$nome_arquivo" | sed 's/\.[^.]*$//')
               
               objeto_saida="$PASTA_DESTINO/${name}.o"
               
-              echo "[*] Compilando arquivo C puro: $nome_arquivo ➔ ${name}.o"
-              # Usa gcc -c para gerar o objeto de código de máquina real, silenciando avisos excessivos com -w se o código legado chiar
               if gcc -c "$source_file" -o "$objeto_saida" -w; then
-                  echo "[+] Sucesso: ${name}.o forjado!"
+                  echo "[+] Sucesso: ${name}.o forjado na tribo $NOME_REPO!"
               else
                   echo "[!] Aviso: Falha ao compilar $nome_arquivo (ignorando)."
               fi
           done
           
+          # 🗄️ A Mágica do Clã: Empacotando os fofoqueiros em uma Biblioteca Estática (.a)
+          echo "[*] Forjando o Arquivo de Clã (.a) para unir os fofoqueiros..."
+          cd "$PASTA_DESTINO"
+          if ls *.o 1> /dev/null 2>&1; then
+              ar rcs "lib${NOME_REPO}.a" *.o
+              echo "[+] Biblioteca de Clã lib${NOME_REPO}.a criada com sucesso! Fofoqueiros unidos e blindados."
+          else
+              echo "[!] Nenhum objeto .o encontrado para empacotar."
+          fi
+          cd - > /dev/null
+          
           echo "[*] Limpando vestígios temporários..."
           rm -rf "$TEMP_CLONE"
           
-          echo "[+] Processo de Purificação 100% C finalizado!"
+          echo "[+] Processo de Purificação e Empacotamento de Clã Concluído!"
           ls -la "$PASTA_DESTINO"
 
       - name: "📦 Sincronizar Arsenal C Puro no Repositório"
@@ -72,6 +81,6 @@ jobs:
           git config --global user.email "carlos@bot.local"
           git add minhas-bibliotecas-100-c/
           if ! git diff-index --quiet HEAD --; then
-            git commit -m "🧪 [C-PURO] Bibliotecas C convertidas em .o para ${{ github.event.inputs.repositorio }} [skip ci]"
+            git commit -m "🧪 [CLÃ-C] Objetos .o e Biblioteca Estática lib${{ github.event.inputs.repositorio }}.a forjados [skip ci]"
             git push
           fi
