@@ -1,0 +1,2 @@
+Origem da Forja Windows (MinGW): https://github.com/libsdl-org/SDL
+Data da Operação: Mon Sep 21 14:23:47 UTC 2026
