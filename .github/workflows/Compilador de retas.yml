@@ -1,0 +1,52 @@
+name: ⚙️ Fornalha de Compilação sob Demanda
+
+on:
+  workflow_dispatch:
+    inputs:
+      arquivo_cpp:
+        description: 'Digite o nome do arquivo CPP (ex: main.cpp ou src/jogo.cpp)'
+        required: true
+        default: 'main.cpp'
+
+jobs:
+  compilar-dinamico:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "🔧 Preparando o Terreno e Dependências"
+        run: |
+          sudo apt-get update && sudo apt-get install -y build-essential mingw-w64
+          mkdir -p executaveis
+
+      - name: "🔥 Fornalha: Caçando o Arquivo e Compilando"
+        run: |
+          ARQUIVO_ALVO="${{ github.event.inputs.arquivo_cpp }}"
+          
+          echo "=== 🎯 BUSCANDO ARQUIVO ALVO: $ARQUIVO_ALVO ==="
+          if [ ! -f "$ARQUIVO_ALVO" ]; then
+            echo "[!] Erro crítico: O arquivo '$ARQUIVO_ALVO' não foi encontrado no repositório!"
+            exit 1
+          fi
+          
+          # Pega o nome base do arquivo sem a extensão para dar nome aos binários
+          NOME_BASE=$(basename "$ARQUIVO_ALVO" .cpp)
+          
+          echo "[*] Compilando versão Linux para $ARQUIVO_ALVO..."
+          g++ -std=c++17 "$ARQUIVO_ALVO" -I.h -o "executaveis/${NOME_BASE}-linux" -lpthread -ldl
+          
+          echo "[*] Compilando versão Windows (Cross-compilação via MinGW) para $ARQUIVO_ALVO..."
+          x86_64-w64-mingw32-g++ -std=c++17 "$ARQUIVO_ALVO" -I.h -o "executaveis/${NOME_BASE}-win.exe" -static
+          
+          echo "[+] Sucesso absoluto! Binários gerados:"
+          ls -la executaveis/
+
+      - name: "📦 Salvando os Executáveis no Repositório"
+        run: |
+          git config --global user.name "Carlos Bot"
+          git config --global user.email "carlos@bot.local"
+          git add executaveis/
+          if ! git diff-index --quiet HEAD --; then
+            git commit -m "🚀 [FORNALHA] Binários gerados para ${{ github.event.inputs.arquivo_cpp }} [skip ci]"
+            git push
+          fi
