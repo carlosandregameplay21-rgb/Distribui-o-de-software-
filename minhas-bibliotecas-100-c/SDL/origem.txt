@@ -1,0 +1,2 @@
+Origem da Forja C: https://github.com/libsdl-org/SDL
+Data da Operação: Mon Sep 21 13:34:50 UTC 2026
