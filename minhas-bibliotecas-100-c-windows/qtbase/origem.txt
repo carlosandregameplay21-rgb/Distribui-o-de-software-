@@ -1,2 +1,0 @@
-Origem da Forja Windows (MinGW): https://github.com/qt/qtbase.git
-Data da Operação: Mon Sep 21 14:26:00 UTC 2026
