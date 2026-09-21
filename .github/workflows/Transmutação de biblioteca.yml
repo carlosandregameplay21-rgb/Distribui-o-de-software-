@@ -1,0 +1,77 @@
+name: transmutação suprema 
+on:
+  workflow_dispatch:
+    inputs:
+      repositorio:
+        description: 'Cole o link do repositório alvo (ex: https://github.com/sqlite/sqlite)'
+        required: true
+        default: ''
+
+jobs:
+  fabrica-purificacao-c:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "🔧 Instalando o Compilador Nativo (GCC) e Binutils"
+        run: |
+          sudo apt-get update && sudo apt-get install -y build-essential binutils
+
+      - name: "🚀 Caçando e Transmutando arquivos .c em Objetos (.o) puros"
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          
+          REPO_ALVO="${{ github.event.inputs.repositorio }}"
+          TEMP_CLONE="temp_repo_clone"
+          
+          NOME_REPO=$(basename "$REPO_ALVO" .git)
+          PASTA_DESTINO="minhas-bibliotecas-100-c/$NOME_REPO"
+          
+          echo "=== 🧪 INICIANDO PURIFICAÇÃO DE BIBLIOTECAS C ==="
+          echo "[*] Repositório alvo: $REPO_ALVO"
+          
+          mkdir -p "$PASTA_DESTINO"
+          rm -rf "$TEMP_CLONE"
+          
+          # 📜 Registro de origem
+          echo "Origem da Forja C: $REPO_ALVO" > "$PASTA_DESTINO/origem.txt"
+          echo "Data da Operação: $(date -u)" >> "$PASTA_DESTINO/origem.txt"
+          
+          echo "[*] Clonando repositório..."
+          git clone --depth 1 "$REPO_ALVO" "$TEMP_CLONE" --quiet
+          
+          echo "[*] Vasculando e compilar arquivos .c puros..."
+          # Caça todos os arquivos .c, ignorando pastas de testes ou exemplos se necessário, e compila via gcc -c
+          find "$TEMP_CLONE" -type f -name "*.c" | while read -r source_file; do
+              nome_arquivo=$(basename "$source_file")
+              name=$(echo "$nome_arquivo" | sed 's/\.[^.]*$//')
+              
+              objeto_saida="$PASTA_DESTINO/${name}.o"
+              
+              echo "[*] Compilando arquivo C puro: $nome_arquivo ➔ ${name}.o"
+              # Usa gcc -c para gerar o objeto de código de máquina real, silenciando avisos excessivos com -w se o código legado chiar
+              if gcc -c "$source_file" -o "$objeto_saida" -w; then
+                  echo "[+] Sucesso: ${name}.o forjado!"
+              else
+                  echo "[!] Aviso: Falha ao compilar $nome_arquivo (ignorando)."
+              fi
+          done
+          
+          echo "[*] Limpando vestígios temporários..."
+          rm -rf "$TEMP_CLONE"
+          
+          echo "[+] Processo de Purificação 100% C finalizado!"
+          ls -la "$PASTA_DESTINO"
+
+      - name: "📦 Sincronizar Arsenal C Puro no Repositório"
+        run: |
+          git config --global user.name "Carlos Bot"
+          git config --global user.email "carlos@bot.local"
+          git add minhas-bibliotecas-100-c/
+          if ! git diff-index --quiet HEAD --; then
+            git commit -m "🧪 [C-PURO] Bibliotecas C convertidas em .o para ${{ github.event.inputs.repositorio }} [skip ci]"
+            git push
+          fi
